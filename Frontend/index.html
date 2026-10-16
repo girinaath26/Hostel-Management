@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>HostelIQ — Smart Hostel & Mess Management System</title>
+  
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  
+  <!-- CSS Stylesheets -->
+  <link rel="stylesheet" href="css/main.css" />
+  <link rel="stylesheet" href="css/components.css" />
+
+  <!-- QRCode.js Library for client-side cryptographic QR pass rendering -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+</head>
+<body>
+
+  <!-- Demo-only persona switcher. It is hidden during normal operation. -->
+  <div class="demo-bar" id="demo-bar" hidden>
+    <div class="demo-title">
+      <span>⚡ DEMO PERSONA SWITCHER:</span>
+    </div>
+    <div class="demo-roles">
+      <button class="demo-role-btn active" data-role="STUDENT" onclick="window.app.switchRole('STUDENT')">
+        <span>👨‍🎓</span> Student
+      </button>
+      <button class="demo-role-btn" data-role="PARENT" onclick="window.app.switchRole('PARENT')">
+        <span>👨‍👩‍👦</span> Parent
+      </button>
+      <button class="demo-role-btn" data-role="RC" onclick="window.app.switchRole('RC', 'rc@hostel.edu')">
+        <span>👨‍🏫</span> Assigned RC 
+      </button>
+      <button class="demo-role-btn" data-role="RC" onclick="window.app.switchRole('RC', 'backup_rc@hostel.edu')">
+        <span>🛡️</span> Backup RC 
+      </button>
+      <button class="demo-role-btn" data-role="WARDEN" onclick="window.app.switchRole('WARDEN')">
+        <span>🏛️</span> Chief Warden
+      </button>
+      <button class="demo-role-btn" data-role="GATEKEEPER" onclick="window.app.switchRole('GATEKEEPER')">
+        <span>🚪</span> Gatekeeper
+      </button>
+      <button class="demo-role-btn" data-role="MESS_STAFF" onclick="window.app.switchRole('MESS_STAFF')">
+        <span>🍽️</span> Mess Staff
+      </button>
+      <button class="demo-role-btn" data-role="ADMIN" onclick="window.app.switchRole('ADMIN')">
+        <span>⚙️</span> Admin
+      </button>
+    </div>
+    <div>
+      <button class="btn btn-secondary btn-sm" style="font-size: 0.72rem; padding: 2px 8px;" onclick="window.ui.showModal('🚀 Hackathon Quick Scenarios Guide', document.getElementById('hackathon-guide-content').innerHTML)">
+        💡 Demo Guide
+      </button>
+    </div>
+  </div>
+
+  <section id="login-screen" style="min-height:100vh;display:grid;place-items:center;padding:24px;background:radial-gradient(circle at top right,#312e81 0,#0f172a 46%,#020617 100%);">
+    <form id="login-form" style="width:min(100%,420px);padding:32px;border:1px solid rgba(148,163,184,.22);border-radius:18px;background:rgba(15,23,42,.94);box-shadow:0 24px 70px rgba(0,0,0,.35);">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:24px;"><div class="brand-icon">HQ</div><div><h1 style="margin:0;color:#fff;font-size:1.45rem;">HostelIQ</h1><span style="color:#94a3b8;font-size:.82rem;">Smart Hostel &amp; Mess Management</span></div></div>
+      <h2 style="color:#fff;font-size:1.15rem;margin:0 0 6px;">Sign in to your portal</h2>
+      <p style="color:#94a3b8;font-size:.85rem;margin:0 0 22px;">Use the account issued by hostel administration.</p>
+      <label class="form-label" for="login-email">Email / Login ID</label>
+      <input class="form-control" id="login-email" type="email" autocomplete="username" required placeholder="you@hostel.edu" />
+      <label class="form-label" for="login-password" style="margin-top:14px;display:block;">Password</label>
+      <input class="form-control" id="login-password" type="password" autocomplete="current-password" required placeholder="Enter your password" />
+      <p id="login-error" style="display:none;color:#fca5a5;font-size:.82rem;margin:14px 0 0;"></p>
+      <button class="btn btn-primary" id="login-submit" type="submit" style="width:100%;margin-top:20px;justify-content:center;">Sign in securely</button>
+      <p style="color:#64748b;font-size:.72rem;line-height:1.5;margin:18px 0 0;">Students, parents, and staff receive accounts from hostel administration. Public sign-up is not available for security.</p>
+    </form>
+  </section>
+
+  <div id="application-shell" hidden>
+  <!-- Main Application Header -->
+  <header class="app-header">
+    <a href="/" class="brand">
+      <div class="brand-icon">HQ</div>
+      <div class="brand-text">
+        <h1>HostelIQ</h1>
+        <span>Smart Paperless Hostel & Mess OS</span>
+      </div>
+    </a>
+
+    <div class="header-actions">
+      <!-- Notification Center Button -->
+      <button class="notif-btn" id="header-notif-btn" onclick="window.app.openNotificationDrawer()" title="Notifications">
+        <span>🔔</span>
+        <span class="notif-count" id="notif-badge-count" style="display: none;">0</span>
+      </button>
+
+      <!-- User Profile Badge -->
+      <div class="user-badge">
+        <img src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150" class="user-avatar" id="header-user-avatar" alt="Avatar" />
+        <div class="user-meta">
+          <span class="user-name" id="header-user-name">Loading...</span>
+          <span class="user-role-tag" id="header-user-role">STUDENT</span>
+        </div>
+      </div>
+      <button class="btn btn-secondary btn-sm" onclick="window.app.logout()">Sign out</button>
+    </div>
+  </header>
+
+  <!-- Main Content Container (Dynamically rendered by Role) -->
+  <main class="main-content" id="main-view-container">
+    <div style="text-align: center; padding: 60px 20px; color: var(--text-muted);">
+      <h2>Initializing HostelIQ Workspace...</h2>
+    </div>
+  </main>
+
+  <!-- Modal Dialog Container -->
+  <div class="modal-overlay" id="app-modal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 class="modal-title" id="modal-title">Modal Title</h3>
+        <button style="background:transparent; border:none; color:var(--text-muted); font-size:1.2rem; cursor:pointer;" onclick="window.ui.closeModal()">✕</button>
+      </div>
+      <div class="modal-body" id="modal-body"></div>
+      <div class="modal-footer" id="modal-footer"></div>
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div id="toast-container"></div>
+
+  <!-- Hidden Demo Guide Template -->
+  <div id="hackathon-guide-content" style="display: none;">
+    <div style="font-size: 0.85rem; line-height: 1.6; color: #cbd5e1;">
+      <h4 style="color: #818cf8; margin-bottom: 6px;">Scenario 1: End-to-End Outpass with Fallback Routing</h4>
+      <ol style="margin-left: 18px; margin-bottom: 12px;">
+        <li>Switch to <strong>Student (Vishnu)</strong> ➔ Click "Request Outpass" ➔ Submit request.</li>
+        <li>Switch to <strong>Parent (Rajesh)</strong> ➔ View action-required card ➔ Click "Approve Outpass".</li>
+        <li>System detects assigned RC (Dr. Senthil) is Offline ➔ Auto-routes to Backup RC!</li>
+        <li>Switch to <strong>Backup RC (Prof. Ramesh)</strong> ➔ Click "Approve & Issue Digital QR".</li>
+        <li>Switch back to <strong>Student</strong> ➔ View cryptographically signed QR Hero Pass.</li>
+        <li>Switch to <strong>Gatekeeper</strong> ➔ Click the quick pass button ➔ Authorized exit verified!</li>
+        <li>Switch to <strong>Gatekeeper</strong> ➔ Click again on return ➔ Return verified & pass closed!</li>
+      </ol>
+
+      <h4 style="color: #f87171; margin-bottom: 6px;">Scenario 2: Overdue Return & Anomaly Alert</h4>
+      <ol style="margin-left: 18px; margin-bottom: 12px;">
+        <li>Switch to <strong>Assigned RC</strong> or <strong>Warden</strong> ➔ Open "Night Attendance".</li>
+        <li>Notice resident <strong>Rohan Gupta</strong> highlighted in red under "Action Required Exceptions" (Return deadline elapsed).</li>
+      </ol>
+
+      <h4 style="color: #38bdf8; margin-bottom: 6px;">Scenario 3: Non-Veg Mess Token with Fraud Protection</h4>
+      <ol style="margin-left: 18px; margin-bottom: 12px;">
+        <li>Switch to <strong>Student</strong> ➔ Open "Mess & Non-Veg Tokens" ➔ Click "Claim Meal Token".</li>
+        <li>Attempt claiming again ➔ System rejects duplicate with 409 Conflict.</li>
+        <li>Switch to <strong>Mess Staff</strong> ➔ Click "Redeem Token" ➔ Validated and meal served.</li>
+        <li>Attempt redeeming again ➔ System rejects with "FRAUD DETECTED: Already Redeemed".</li>
+      </ol>
+    </div>
+  </div>
+  </div>
+
+  <!-- Application Module Script -->
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>
